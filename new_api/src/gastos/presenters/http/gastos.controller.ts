@@ -1,13 +1,10 @@
 import {
   Controller,
   Get,
-  Post,
   Param,
-  Body,
-  Put,
   Delete,
 } from '@nestjs/common';
-import { GastosService } from 'src/gastos/application/gastos.service';
+import { GastosService } from '../../../gastos/application/gastos.service';
 
 @Controller('gastos')
 export class GastosController {

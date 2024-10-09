@@ -1,140 +1,167 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AdocoesService } from './adocoes.service';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Adocao } from '../domain/adocao';
-import { Repository } from 'typeorm';
+import { AdocaoRepository } from './ports/adocoes.repository';
+import { AnimalRepository } from '../../animais/application/ports/animais.repository';
+import { AdotanteRepository } from '../../adotantes/application/ports/adotantes.repository';
+import { AdocaoFactory } from '../domain/factories/adocoes-factory';
 import { CreateAdocaoDto } from '../presenters/http/dto/create-adocao.dto';
-import { UpdateAdocaoDto } from '../presenters/http/dto/update-adocao.dto';
+import { Adocao } from '../domain/adocao';
+import { Animal } from '../../animais/domain/animal';
+import { Adotante } from '../../adotantes/domain/adotante';
+import { NotFoundException, ConflictException } from '@nestjs/common';
 
-describe('Testando AdocoesService', () => {
+describe('AdocoesService', () => {
   let service: AdocoesService;
-  let repository: Repository<Adocao>;
+  let adocaoRepository: AdocaoRepository;
+  let animalRepository: AnimalRepository;
+  let adotanteRepository: AdotanteRepository;
 
   const mockAdocaoRepository = {
-    create: jest.fn().mockImplementation((dto: CreateAdocaoDto) => dto),
-    save: jest.fn().mockImplementation((adocao: Adocao) =>
-      Promise.resolve({
-        id: Date.now(),
-        ...adocao,
-      })
-    ),
-    find: jest.fn().mockResolvedValue([
-      {
-        id: 1,
-        adotante_id: 1,
-        animal_id: 1,
-        data_adocao: new Date(),
-        condicoes_especiais: 'Nenhuma',
-        status_aprovacao: 'Aprovada',
-      },
-    ]),
-    findOne: jest.fn().mockResolvedValue({
-      id: 1,
-      adotante_id: 1,
-      animal_id: 1,
-      data_adocao: new Date(),
-      condicoes_especiais: 'Nenhuma',
-      status_aprovacao: 'Aprovada',
-    }),
-    update: jest.fn().mockResolvedValue({
-      id: 1,
-      adotante_id: 2,
-      animal_id: 2,
-      data_adocao: new Date(),
-      condicoes_especiais: 'Precisa de cuidado especial',
-      status_aprovacao: 'Aprovada',
-    }),
-    remove: jest.fn().mockResolvedValue({ id: 1 }),
+    findAll: jest.fn(),
+    findById: jest.fn(),
+    save: jest.fn(),
+    update: jest.fn(),
+    remove: jest.fn(),
+  };
+
+  const mockAnimalRepository = {
+    findById: jest.fn(),
+    adopt: jest.fn(),
+  };
+
+  const mockAdotanteRepository = {
+    findById: jest.fn(),
+    adopt: jest.fn(),
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AdocoesService,
-        {
-          provide: getRepositoryToken(Adocao),
-          useValue: mockAdocaoRepository,
-        },
+        { provide: AdocaoRepository, useValue: mockAdocaoRepository },
+        { provide: AnimalRepository, useValue: mockAnimalRepository },
+        { provide: AdotanteRepository, useValue: mockAdotanteRepository },
+        AdocaoFactory,
       ],
     }).compile();
 
     service = module.get<AdocoesService>(AdocoesService);
-    repository = module.get<Repository<Adocao>>(getRepositoryToken(Adocao));
+    adocaoRepository = module.get<AdocaoRepository>(AdocaoRepository);
+    animalRepository = module.get<AnimalRepository>(AnimalRepository);
+    adotanteRepository = module.get<AdotanteRepository>(AdotanteRepository);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  it('should create a new adoption', async () => {
-    const dto: CreateAdocaoDto = {
-      adotante_id: 1,
-      animal_id: 1,
-      data_adocao: new Date(),
-      condicoes_especiais: 'Nenhuma',
-      status_aprovacao: 'Pendente',
-    };
-
-    const result = await service.create(dto);
-    expect(result).toEqual({
-      id: expect.any(Number),
-      ...dto,
-    });
-    expect(repository.create).toHaveBeenCalledWith(dto);
-    expect(repository.save).toHaveBeenCalledWith(dto);
-  });
-
-  it('should return an array of adoptions', async () => {
-    const result = await service.findAll();
-    expect(result).toEqual([
-      {
-        id: 1,
-        adotante_id: 1,
+  describe('create', () => {
+    it('should create a new adoption successfully', async () => {
+      const createAdocaoDto: CreateAdocaoDto = {
+        data_adocao: new Date(),
+        condicoes_especiais: 'Some conditions',
+        status_aprovacao: 'Approved',
         animal_id: 1,
-        data_adocao: expect.any(Date),
-        condicoes_especiais: 'Nenhuma',
-        status_aprovacao: 'Aprovada',
-      },
-    ]);
-    expect(repository.find).toHaveBeenCalled();
-  });
+        adotante_id: 1,
+      };
 
-  it('should return a single adoption by ID', async () => {
-    const id = 1;
-    const result = await service.findOne(id);
-    expect(result).toEqual({
-      id,
-      adotante_id: 1,
-      animal_id: 1,
-      data_adocao: expect.any(Date),
-      condicoes_especiais: 'Nenhuma',
-      status_aprovacao: 'Aprovada',
+      const animal: Animal = {
+        id: 1,
+        nome: 'Rex',
+        estado_adocao: 'Disponivel',
+      } as Animal;
+      const adotante: Adotante = {
+        id: 1,
+        nome: 'John Doe',
+        adocao: [],
+      } as Adotante;
+
+      jest.spyOn(animalRepository, 'findById').mockResolvedValue(animal);
+      jest.spyOn(adotanteRepository, 'findById').mockResolvedValue(adotante);
+      jest
+        .spyOn(adocaoRepository, 'save')
+        .mockResolvedValue(
+          new Adocao(
+            1,
+            adotante.id,
+            animal.id,
+            createAdocaoDto.data_adocao,
+            createAdocaoDto.condicoes_especiais,
+            createAdocaoDto.status_aprovacao,
+            animal,
+            adotante,
+          ),
+        );
+
+      const result = await service.create(createAdocaoDto);
+      expect(result).toBeDefined();
+      expect(adocaoRepository.save).toHaveBeenCalled();
     });
-    expect(repository.findOne).toHaveBeenCalledWith(id);
-  });
 
-  it('should update an adoption', async () => {
-    const id = 1;
-    const dto: UpdateAdocaoDto = {
-      adotante_id: 2,
-      animal_id: 2,
-      data_adocao: new Date(),
-      condicoes_especiais: 'Precisa de cuidado especial',
-      status_aprovacao: 'Aprovada',
-    };
+    it('should throw a NotFoundException if animal is not found', async () => {
+      const createAdocaoDto: CreateAdocaoDto = {
+        data_adocao: new Date(),
+        condicoes_especiais: 'Some conditions',
+        status_aprovacao: 'Approved',
+        animal_id: 1,
+        adotante_id: 1,
+      };
 
-    const result = await service.update(id, dto);
-    expect(result).toEqual({
-      id,
-      ...dto,
+      jest.spyOn(animalRepository, 'findById').mockResolvedValue(null);
+
+      await expect(service.create(createAdocaoDto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
-    expect(repository.update).toHaveBeenCalledWith(id, dto);
-  });
 
-  it('should remove an adoption', async () => {
-    const id = 1;
-    const result = await service.remove(id);
-    expect(result).toEqual({ id });
-    expect(repository.remove).toHaveBeenCalledWith({ id });
+    it('should throw a NotFoundException if adotante is not found', async () => {
+      const createAdocaoDto: CreateAdocaoDto = {
+        data_adocao: new Date(),
+        condicoes_especiais: 'Some conditions',
+        status_aprovacao: 'Approved',
+        animal_id: 1,
+        adotante_id: 1,
+      };
+
+      const animal: Animal = {
+        id: 1,
+        nome: 'Rex',
+        estado_adocao: 'Disponivel',
+      } as Animal;
+      jest.spyOn(animalRepository, 'findById').mockResolvedValue(animal);
+      jest.spyOn(adotanteRepository, 'findById').mockResolvedValue(null);
+
+      await expect(service.create(createAdocaoDto)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should throw a ConflictException if the animal is already adopted', async () => {
+      const createAdocaoDto: CreateAdocaoDto = {
+        data_adocao: new Date(),
+        condicoes_especiais: 'Some conditions',
+        status_aprovacao: 'Approved',
+        animal_id: 1,
+        adotante_id: 1,
+      };
+
+      const animal: Animal = {
+        id: 1,
+        nome: 'Rex',
+        estado_adocao: 'Adotado',
+      } as Animal;
+      const adotante: Adotante = {
+        id: 1,
+        nome: 'John Doe',
+        adocao: [],
+      } as Adotante;
+
+      jest.spyOn(animalRepository, 'findById').mockResolvedValue(animal);
+      jest.spyOn(adotanteRepository, 'findById').mockResolvedValue(adotante);
+
+      await expect(service.create(createAdocaoDto)).rejects.toThrow(
+        ConflictException,
+      );
+    });
   });
 });

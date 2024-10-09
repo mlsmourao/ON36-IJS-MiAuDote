@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { Gasto } from '../gastos';
-import { CreateGastoDto } from 'src/gastos/presenters/http/dto/create-gasto.dto';
-import { Consumivel } from "src/consumiveis/domain/consumivel"; 
-import { CreateConsumivelDto } from "src/consumiveis/presenters/http/dto/create-consumivel.dto";
-import { Doacao } from "src/doacoes/domain/doacoes"; 
-import { CreateDoacaoDto } from "src/doacoes/presenters/http/dto/create-doacao.dto";
-import { Castracao } from "src/castracoes/domain/castracao"; 
-import { CreateCastracaoDto } from "src/castracoes/presenters/http/dto/create-castracao.dto";
-import { Vacina } from "src/vacinas/domain/vacinas"; 
-import { CreateVacinaDto } from "src/vacinas/presenters/http/dto/create-vacina.dto";
-import { Medicamento } from "src/medicamentos/domain/medicamentos"; 
-import { CreateMedicamentoDto } from "src/medicamentos/presenters/http/dto/create-medicamento.dto";
+import { CreateGastoDto } from '../../../gastos/presenters/http/dto/create-gasto.dto';
+import { Consumivel } from "../../../consumiveis/domain/consumivel"; 
+import { CreateConsumivelDto } from "../../../consumiveis/presenters/http/dto/create-consumivel.dto";
+import { Doacao } from "../../../doacoes/domain/doacoes"; 
+import { CreateDoacaoDto } from "../../../doacoes/presenters/http/dto/create-doacao.dto";
+import { Castracao } from "../../../castracoes/domain/castracao"; 
+import { CreateCastracaoDto } from "../../../castracoes/presenters/http/dto/create-castracao.dto";
+import { Vacina } from "../../../vacinas/domain/vacinas"; 
+import { CreateVacinaDto } from "../../../vacinas/presenters/http/dto/create-vacina.dto";
+import { Medicamento } from "../../../medicamentos/domain/medicamentos"; 
+import { CreateMedicamentoDto } from "../../../medicamentos/presenters/http/dto/create-medicamento.dto";
 import { GastoType } from "../enum/gasto.enum";
 
 @Injectable()

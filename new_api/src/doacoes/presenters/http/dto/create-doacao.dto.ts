@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsNumber, IsDate, IsString, Length, Min, Max } from 'class-validator';
-import { CreateGastoDto } from 'src/gastos/presenters/http/dto/create-gasto.dto';
+import { CreateGastoDto } from '../../../../gastos/presenters/http/dto/create-gasto.dto';
 
 export class CreateDoacaoDto extends CreateGastoDto {
     @IsNumber()

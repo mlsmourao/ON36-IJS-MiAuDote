@@ -3,14 +3,14 @@ import { Castracao } from '../domain/castracao';
 import { CreateCastracaoDto } from '../presenters/http/dto/create-castracao.dto';
 import { UpdateCastracaoDto } from '../presenters/http/dto/update-castracao.dto';
 import { CastracaoRepository } from './ports/castracoes.repository';
-import { GastoFactory } from 'src/gastos/domain/factories/gastos-factory';
-import { GastoRepository } from 'src/gastos/application/ports/gasto.repository';
-import { CreateGastoDto } from 'src/gastos/presenters/http/dto/create-gasto.dto'
-import { GastoType } from 'src/gastos/domain/enum/gasto.enum';
-import { Veterinario } from 'src/veterinarios/domain/veterinarios';
-import { VeterinarioRepository } from 'src/veterinarios/application/ports/veterinarios.repository';
-import { Animal } from 'src/animais/domain/animal';
-import { AnimalRepository } from 'src/animais/application/ports/animais.repository';
+import { GastoFactory } from '../../gastos/domain/factories/gastos-factory';
+import { GastoRepository } from '../../gastos/application/ports/gasto.repository';
+import { CreateGastoDto } from '../../gastos/presenters/http/dto/create-gasto.dto'
+import { GastoType } from '../../gastos/domain/enum/gasto.enum';
+import { Veterinario } from '../../veterinarios/domain/veterinarios';
+import { VeterinarioRepository } from '../../veterinarios/application/ports/veterinarios.repository';
+import { Animal } from '../../animais/domain/animal';
+import { AnimalRepository } from '../../animais/application/ports/animais.repository';
 
 @Injectable()
 export class CastracoesService {
@@ -115,7 +115,9 @@ export class CastracoesService {
   }
 
   async remove(id: number): Promise<{ deleted: boolean }> {
-    await this.castracaoRepository.remove(id);
+    const castracao = await this.findOne(id);
+    await this.gastoRepository.remove(castracao.id); 
+    await this.castracaoRepository.remove(id); 
     return { deleted: true };
   }
 }

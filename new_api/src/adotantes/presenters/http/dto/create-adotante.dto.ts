@@ -1,5 +1,5 @@
 import { IsNumber, IsString, Min, Length } from 'class-validator';
-import { CreatePessoaDto } from 'src/pessoas/presenters/http/dto/create-pessoa.dto';
+import { CreatePessoaDto } from '../../../../pessoas/presenters/http/dto/create-pessoa.dto';
 
 export class CreateAdotanteDto extends CreatePessoaDto{
     @IsNumber()

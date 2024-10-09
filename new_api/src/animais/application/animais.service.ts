@@ -1,5 +1,5 @@
 import { AnimalFactory } from './../domain/factories/animais-factory';
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { AnimalRepository } from "./ports/animais.repository";
 import { Animal } from '../domain/animal';
 import { CreateAnimalDto } from '../presenters/http/dto/create-animal.dto';
@@ -19,7 +19,7 @@ export class AnimaisService {
   async findOne(id: number): Promise<Animal> {
     const animal = await this.animalRepository.findById(id);
     if (!animal) {
-      throw new Error(`Animal with ID ${id} not found`);
+      throw new NotFoundException(`Animal with ID ${id} not found`);
     }
     return animal;
   }

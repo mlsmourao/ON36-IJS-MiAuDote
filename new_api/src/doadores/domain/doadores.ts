@@ -1,5 +1,5 @@
-import { Pessoa } from 'src/pessoas/domain/pessoas';
-import { Doacao } from 'src/doacoes/domain/doacoes';
+import { Pessoa } from '../../pessoas/domain/pessoas';
+import { Doacao } from '../../doacoes/domain/doacoes';
 
 export class Doador extends Pessoa {
   constructor(

@@ -4,58 +4,42 @@ import { VacinasService } from '../../application/vacinas.service';
 import { CreateVacinaDto } from './dto/create-vacina.dto';
 import { UpdateVacinaDto } from './dto/update-vacina.dto';
 
-describe('VacinasController', () => {
+describe('Teste para VacinasController', () => {
   let controller: VacinasController;
   let service: VacinasService;
 
   const mockVacinasService = {
-    findAll: jest.fn().mockResolvedValue([
+    create: jest.fn((dto) => {
+      return {
+        id: Date.now(),
+        ...dto,
+        data_vacinacao: dto.data_vacinacao || new Date(),
+      };
+    }),
+    findAll: jest.fn(() => [
       {
         id: 1,
         animal_id: 1,
         data_vacinacao: new Date(),
-        tipo_vacina: 'Vacina A',
+        tipo_vacina: 'Raiva',
         veterinario_id: 1,
         gasto_id: 1,
-        animal: null,
-        veterinario: null,
-        gasto: null,
       },
     ]),
-    findOne: jest.fn().mockResolvedValue({
+    findOne: jest.fn((id) => ({
       id: 1,
       animal_id: 1,
       data_vacinacao: new Date(),
-      tipo_vacina: 'Vacina A',
+      tipo_vacina: 'Raiva',
       veterinario_id: 1,
       gasto_id: 1,
-      animal: null,
-      veterinario: null,
-      gasto: null,
-    }),
-    create: jest.fn().mockResolvedValue({
-      id: 1,
-      animal_id: 1,
-      data_vacinacao: new Date(),
-      tipo_vacina: 'Vacina A',
-      veterinario_id: 1,
-      gasto_id: 1,
-      animal: null,
-      veterinario: null,
-      gasto: null,
-    }),
-    update: jest.fn().mockResolvedValue({
-      id: 1,
-      animal_id: 1,
-      data_vacinacao: new Date(),
-      tipo_vacina: 'Vacina B',
-      veterinario_id: 1,
-      gasto_id: 1,
-      animal: null,
-      veterinario: null,
-      gasto: null,
-    }),
-    remove: jest.fn().mockResolvedValue({ affected: 1 }),
+    })),
+    update: jest.fn((id, dto) => ({
+      id,
+      ...dto,
+      data_vacinacao: dto.data_vacinacao || new Date(),
+    })),
+    remove: jest.fn((id) => ({ id })),
   };
 
   beforeEach(async () => {
@@ -77,85 +61,75 @@ describe('VacinasController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should return all vacinas', async () => {
-    const result = await controller.findAll();
-    expect(result).toEqual([
+  it('should create a new vaccine', async () => {
+    const dto: CreateVacinaDto = {
+      animal_id: 1,
+      data_vacinacao: new Date(),
+      tipo_vacina: 'Raiva',
+      veterinario_id: 1,
+      gasto_id: 1,
+      data_gasto: undefined,
+      tipo: '',
+      quantidade: 0,
+      valor: 0
+    };
+    expect(await controller.create(dto)).toEqual({
+      id: expect.any(Number),
+      ...dto,
+    });
+
+    expect(service.create).toHaveBeenCalledWith(dto);
+  });
+
+  it('should return an array of vaccines', async () => {
+    expect(await controller.findAll()).toEqual([
       {
         id: 1,
         animal_id: 1,
         data_vacinacao: new Date(),
-        tipo_vacina: 'Vacina A',
+        tipo_vacina: 'Raiva',
         veterinario_id: 1,
         gasto_id: 1,
-        animal: null,
-        veterinario: null,
-        gasto: null,
       },
     ]);
     expect(service.findAll).toHaveBeenCalled();
   });
 
-  it('should return one vacina by ID', async () => {
-    const result = await controller.findOne(1);
-    expect(result).toEqual({
-      id: 1,
+  it('should return a single vaccine by ID', async () => {
+    const id = 1;
+    expect(await controller.findOne(id)).toEqual({
+      id,
       animal_id: 1,
       data_vacinacao: new Date(),
-      tipo_vacina: 'Vacina A',
+      tipo_vacina: 'Raiva',
       veterinario_id: 1,
       gasto_id: 1,
-      animal: null,
-      veterinario: null,
-      gasto: null,
     });
-    expect(service.findOne).toHaveBeenCalledWith(1);
+
+    expect(service.findOne).toHaveBeenCalledWith(id);
   });
 
-  it('should create a new vacina', async () => {
-    const createDto: CreateVacinaDto = {
+  it('should update an vaccine', async () => {
+    const id = 1;
+    const dto: UpdateVacinaDto = {
       animal_id: 1,
       data_vacinacao: new Date(),
-      tipo_vacina: 'Vacina A',
+      tipo_vacina: 'Updated',
       veterinario_id: 1,
       gasto_id: 1,
     };
-    const result = await controller.create(createDto);
-    expect(result).toEqual({
-      id: 1,
-      animal_id: 1,
-      data_vacinacao: new Date(),
-      tipo_vacina: 'Vacina A',
-      veterinario_id: 1,
-      gasto_id: 1,
-      animal: null,
-      veterinario: null,
-      gasto: null,
+
+    expect(await controller.update(id, dto)).toEqual({
+      id,
+      ...dto,
     });
-    expect(service.create).toHaveBeenCalledWith(createDto);
+
+    expect(service.update).toHaveBeenCalledWith(id, dto);
   });
 
-  it('should update a vacina', async () => {
-    const updateDto: UpdateVacinaDto = {
-      tipo_vacina: 'Vacina B',
-    };
-    const result = await controller.update(1, updateDto);
-    expect(result).toEqual({
-      id: 1,
-      animal_id: 1,
-      data_vacinacao: new Date(),
-      tipo_vacina: 'Vacina B',
-      veterinario_id: 1,
-      gasto_id: 1,
-      animal: null,
-      veterinario: null,
-      gasto: null,
-    });
-    expect(service.update).toHaveBeenCalledWith(1, updateDto);
-  });
-
-  it('should delete a vacina', async () => {
-    const result = await controller.remove(1);
-    expect(result).toEqual({ affected: 1 });
-    expect(service.remove).toHaveBeenCalledWith(1);
+  it('should remove an vaccine', async () => {
+    const id = 1;
+    expect(await controller.remove(id)).toEqual({ id });
+    expect(service.remove).toHaveBeenCalledWith(id);
   });
 });

@@ -7,7 +7,7 @@ import {
   Put,
   Delete,
 } from '@nestjs/common';
-import { VeterinariosService } from 'src/veterinarios/application/veterinarios.service'; 
+import { VeterinariosService } from '../../application/veterinarios.service'; 
 import { CreateVeterinarioDto } from './dto/create-veterinario.dto';
 import { UpdateVeterinarioDto } from './dto/update-veterinario.dto'; 
 

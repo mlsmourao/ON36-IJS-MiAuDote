@@ -4,35 +4,27 @@ import { AdotantesService } from '../../application/adotantes.service';
 import { CreateAdotanteDto } from './dto/create-adotante.dto';
 import { UpdateAdotanteDto } from './dto/update-adotante.dto';
 
-describe('Teste para AdotantesController', () => {
+describe('AdotantesController', () => {
   let controller: AdotantesController;
   let service: AdotantesService;
 
+  const mockAdotante = {
+    id: 1,
+    renda: 123.45,
+    condicao_entrevista: 'Aprovado',
+    nome: 'John Doe',
+    cep: '12345-678',
+    endereco: 'Rua Exemplo',
+    telefone: ['123456789'],
+    email: 'johndoe@example.com',
+    cpf: '123.456.789-00',
+  };
+
   const mockAdotantesService = {
-    create: jest.fn((dto) => {
-      return {
-        id: Date.now(),
-        ...dto
-      };
-    }),
-    findAll: jest.fn(() => [
-      {
-        id: 1,
-        renda: 123.45,
-        condicao_entrevista: 'Aprovado',
-        pessoa_id: 1
-      },
-    ]),
-    findOne: jest.fn((id) => ({
-      id,
-      renda: 123.45,
-      condicao_entrevista: 'Aprovado',
-      pessoa_id: 1
-    })),
-    update: jest.fn((id, dto) => ({
-      id,
-      ...dto
-    })),
+    create: jest.fn((dto) => ({ id: Date.now(), ...dto })),
+    findAll: jest.fn(() => [mockAdotante]),
+    findOne: jest.fn((id) => ({ ...mockAdotante, id })),
+    update: jest.fn((id, dto) => ({ id, ...dto })),
     remove: jest.fn((id) => ({ id })),
   };
 
@@ -55,63 +47,71 @@ describe('Teste para AdotantesController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should create a new adopter', async () => {
-    const dto: CreateAdotanteDto = {
-      renda: 123.45,
-      condicao_entrevista: 'Aprovado',
-      pessoa_id: 1
-    };
-    expect(await controller.create(dto)).toEqual({
-      id: expect.any(Number),
-      ...dto,
-    });
-
-    expect(service.create).toHaveBeenCalledWith(dto);
-  });
-
-  it('should return an array of adopters', async () => {
-    expect(await controller.findAll()).toEqual([
-      {
-        id: 1,
+  describe('create()', () => {
+    it('should create a new adopter', async () => {
+      const dto: CreateAdotanteDto = {
+        nome: 'John Doe',
+        cep: '12345-678',
+        endereco: 'Rua Exemplo',
+        telefone: ['123456789'],
+        email: 'johndoe@example.com',
+        cpf: '123.456.789-00',
         renda: 123.45,
         condicao_entrevista: 'Aprovado',
-        pessoa_id: 1
-      },
-    ]);
-    expect(service.findAll).toHaveBeenCalled();
-  });
+      };
 
-  it('should return a single adopter by ID', async () => {
-    const id = 1;
-    expect(await controller.findOne(id)).toEqual({
-      id,
-      renda: 123.45,
-      condicao_entrevista: 'Aprovado',
-      pessoa_id: 1
+      expect(await controller.create(dto)).toEqual({
+        id: expect.any(Number),
+        ...dto,
+      });
+
+      expect(service.create).toHaveBeenCalledWith(dto);
     });
-
-    expect(service.findOne).toHaveBeenCalledWith(id);
   });
 
-  it('should update an adopter', async () => {
-    const id = 1;
-    const dto: UpdateAdotanteDto = {
-      renda: 123.45,
-      condicao_entrevista: 'Aprovado Update',
-      pessoa_id: 1
-    };
-
-    expect(await controller.update(id, dto)).toEqual({
-      id,
-      ...dto,
+  describe('findAll()', () => {
+    it('should return an array of adopters', async () => {
+      expect(await controller.findAll()).toEqual([mockAdotante]);
+      expect(service.findAll).toHaveBeenCalled();
     });
-
-    expect(service.update).toHaveBeenCalledWith(id, dto);
   });
 
-  it('should remove an adopter', async () => {
-    const id = 1;
-    expect(await controller.remove(id)).toEqual({ id });
-    expect(service.remove).toHaveBeenCalledWith(id);
+  describe('findOne()', () => {
+    it('should return a single adopter by ID', async () => {
+      const id = 1;
+      expect(await controller.findOne(id)).toEqual(mockAdotante);
+      expect(service.findOne).toHaveBeenCalledWith(id);
+    });
+  });
+
+  describe('update()', () => {
+    it('should update an adopter', async () => {
+      const id = 1;
+      const dto: UpdateAdotanteDto = {
+        renda: 200.0,
+        condicao_entrevista: 'Updated',
+        nome: 'John Doe',
+        cep: '12345-678',
+        endereco: 'Rua Exemplo',
+        telefone: ['123456789'],
+        email: 'johndoe@example.com',
+        cpf: '123.456.789-00',
+      };
+
+      expect(await controller.update(id, dto)).toEqual({
+        id,
+        ...dto,
+      });
+
+      expect(service.update).toHaveBeenCalledWith(id, dto);
+    });
+  });
+
+  describe('remove()', () => {
+    it('should remove an adopter', async () => {
+      const id = 1;
+      expect(await controller.remove(id)).toEqual({ id });
+      expect(service.remove).toHaveBeenCalledWith(id);
+    });
   });
 });

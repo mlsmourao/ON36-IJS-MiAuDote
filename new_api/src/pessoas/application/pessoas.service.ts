@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { PessoaRepository } from "./ports/pessoas.repository";
 import { Pessoa } from '../domain/pessoas';
 

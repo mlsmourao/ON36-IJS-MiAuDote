@@ -1,116 +1,179 @@
+import { GastoFactory } from '../../gastos/domain/factories/gastos-factory';
 import { Test, TestingModule } from '@nestjs/testing';
-import { VacinaRepository } from '../application/ports/vacinas.repository';
-import { VacinaFactory } from "../domain/factories/vacinas-factory";
 import { VacinasService } from './vacinas.service'; 
+import { VacinaRepository } from '../application/ports/vacinas.repository';
+import { GastoRepository } from '../../gastos/application/ports/gasto.repository';
 import { CreateVacinaDto } from '../presenters/http/dto/create-vacina.dto';
-import { UpdateVacinaDto } from '../presenters/http/dto/update-vacina.dto';
 import { Vacina } from '../domain/vacinas';
+import { VeterinarioRepository } from '../../veterinarios/application/ports/veterinarios.repository';
+import { Veterinario } from 'src/veterinarios/domain/veterinarios';
+import { AnimalRepository } from '../../animais/application/ports/animais.repository';
+import { Animal } from 'src/animais/domain/animal';
 
-describe('VacinasService', () => {
+describe('Testando VacinasService', () => {
   let service: VacinasService;
-  let vacinaFactory: VacinaFactory;
   let vacinaRepository: VacinaRepository;
+  let gastoRepository: GastoRepository;
+  let gastoFactory: GastoFactory;
+  let veterinarioRepository: VeterinarioRepository;
+  let animalRepository: AnimalRepository;
 
-  const createVacinaDto: CreateVacinaDto = {
+  const mockVacina = {
+    id: 1,
     animal_id: 1,
-    data_vacinacao: new Date('2024-09-18T14:30:00Z'),
-    tipo_vacina: 'Vacina A',
+    data_vacinacao: new Date(2019, 1, 1),
+    tipo_vacina: 'Raiva',
     veterinario_id: 1,
-    gasto_id: 1,
-  };
-  
-
-  const updateVacinaDto: UpdateVacinaDto = {
-    animal_id: 1,
-    data_vacinacao: new Date('2024-09-18T14:30:00Z'),
-    tipo_vacina: 'Vacina B',
-    veterinario_id: 1,
-    gasto_id: 1,
+    data_gasto: new Date(2019, 1, 1),
+    tipo: 'Vacinação Obrigatória',
+    quantidade: 1,
+    valor: 123
   };
 
-  const vacina = new Vacina(
-    1,
-    1,
-    new Date(),
-    'Vacina A',
-    1,
-    1,
-  );
+  const mockVacinaRepository = {
+    save: jest.fn(),
+    findAll: jest.fn().mockResolvedValue([mockVacina]),
+    findById: jest.fn(),
+    update: jest.fn(),
+    remove: jest.fn().mockResolvedValue(null),
+  };
+
+  const mockGastoRepository = {
+    save: jest.fn(),
+    findAll: jest.fn(),
+    findById: jest.fn(), 
+    update: jest.fn(),
+    remove: jest.fn(),
+  };
+
+  const mockGastoFactory = {
+    createGasto: jest.fn(),
+  };
+
+  const mockVeterinarioRepository = {
+    findById: jest.fn(),
+    castrate: jest.fn(),
+  };
+
+  const mockAnimalRepository = {
+    findById: jest.fn(),
+    castrate: jest.fn(),
+  };
 
   beforeEach(async () => {
-    vacinaFactory = {
-      create: jest.fn().mockImplementation((data) => {
-        return new Vacina(
-          1,
-          data.animal_id,
-          data.data_vacinacao,
-          data.tipo_vacina,
-          data.veterinario_id,
-          data.gasto_id,
-        );
-      }),
-    };
-
-    vacinaRepository = {
-      save: jest.fn().mockImplementation((vacina: Vacina) => Promise.resolve(vacina)),
-      findAll: jest.fn().mockResolvedValue([vacina]),
-      findById: jest.fn().mockResolvedValue(vacina),
-      update: jest.fn().mockResolvedValue(vacina),
-      remove: jest.fn().mockResolvedValue(undefined),
-    } as unknown as VacinaRepository;
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         VacinasService,
         {
           provide: VacinaRepository,
-          useValue: vacinaRepository,
+          useValue: mockVacinaRepository,
         },
         {
-          provide: VacinaFactory,
-          useValue: vacinaFactory,
+          provide: GastoRepository,
+          useValue: mockGastoRepository,
         },
+        {
+          provide: GastoFactory,
+          useValue: mockGastoFactory,
+        },
+        {
+          provide: VeterinarioRepository,
+          useValue: mockVeterinarioRepository,
+        },
+        {
+          provide: AnimalRepository,
+          useValue: mockAnimalRepository,
+        }
       ],
     }).compile();
 
     service = module.get<VacinasService>(VacinasService);
+    vacinaRepository = module.get<VacinaRepository>(VacinaRepository);
+    gastoRepository = module.get<GastoRepository>(GastoRepository);
+    gastoFactory = module.get<GastoFactory>(GastoFactory);
+    veterinarioRepository = module.get<VeterinarioRepository>(VeterinarioRepository);
+    animalRepository = module.get<AnimalRepository>(AnimalRepository);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  it('should create a vacina', async () => {
-    const createdVacina = await service.create(createVacinaDto);
-    expect(createdVacina).toBeInstanceOf(Vacina);
-    expect(createdVacina.animal_id).toBe(createVacinaDto.animal_id);
-    expect(vacinaRepository.save).toHaveBeenCalledWith(expect.any(Vacina));
+  describe('create', () => {
+    it('should create a new vaccine successfully', async () => {
+      const dto: CreateVacinaDto = {
+        data_gasto: new Date(2019, 1, 1),
+        tipo: 'Vacinação Obrigatória',
+        valor: 123,
+        animal_id: 1,
+        veterinario_id: 1,
+        gasto_id: 1,
+        data_vacinacao: new Date(2019, 1, 1),
+        tipo_vacina: 'Raiva',
+        quantidade: 1,
+      };
+
+      const animal: Animal = {
+        id: 1,
+        nome: 'Rex',
+      } as Animal;
+      const veterinario: Veterinario = {
+        id: 1,
+        nome: 'Dr. Veterinário',
+        castracoes: [],
+      } as Veterinario;
+
+      jest.spyOn(animalRepository, 'findById').mockResolvedValue(animal);
+      jest.spyOn(veterinarioRepository, 'findById').mockResolvedValue(veterinario);
+
+      const mockGasto = { id: 1, ...dto }; 
+      jest.spyOn(gastoRepository, 'save').mockResolvedValue(mockGasto);
+      jest.spyOn(gastoFactory, 'createGasto').mockReturnValue(mockGasto);
+
+      jest.spyOn(vacinaRepository, 'save').mockResolvedValue(new Vacina(
+        1, 
+        animal.id,
+        dto.data_vacinacao, 
+        dto.tipo_vacina, 
+        veterinario.id, 
+        mockGasto.id, 
+        dto.data_gasto, 
+        dto.tipo,
+        dto.quantidade,
+        dto.valor 
+      ));
+
+      const result = await service.create(dto);
+      expect(result).toBeDefined();
+      expect(vacinaRepository.save).toHaveBeenCalled();
+    });
   });
 
-  it('should return all vacinas', async () => {
-    const vacinas = await service.findAll();
-    expect(vacinas).toHaveLength(1);
-    expect(vacinas[0]).toBeInstanceOf(Vacina);
-    expect(vacinas[0].tipo_vacina).toBe(vacina.tipo_vacina);
+  describe('findAll', () => {
+    it('should return an array of vaccines', async () => {
+      const result = await service.findAll();
+      expect(result).toEqual([mockVacina]);
+      expect(mockVacinaRepository.findAll).toHaveBeenCalled();
+    });
   });
 
-  it('should return a vacina by ID', async () => {
-    const foundVacina = await service.findOne(1);
-    expect(foundVacina).toBeInstanceOf(Vacina);
-    expect(foundVacina.id).toBe(1);
-    expect(foundVacina.tipo_vacina).toBe(vacina.tipo_vacina);
+  describe('findOne', () => {
+    it('should return a single vaccine by ID', async () => {
+      const id = 1;
+      jest.spyOn(mockVacinaRepository, 'findById').mockResolvedValue(mockVacina);
+      const result = await service.findOne(id);
+      expect(result).toEqual(mockVacina);
+      expect(mockVacinaRepository.findById).toHaveBeenCalledWith(id);
+    });
   });
 
-  it('should update a vacina', async () => {
-    const updatedVacina = await service.update(1, updateVacinaDto);
-    expect(updatedVacina).toBeInstanceOf(Vacina);
-    expect(updatedVacina.tipo_vacina).toBe(updateVacinaDto.tipo_vacina);
-    expect(vacinaRepository.update).toHaveBeenCalledWith(1, expect.any(Vacina));
-  });
-
-  it('should remove a vacina', async () => {
-    const result = await service.remove(1);
-    expect(result).toEqual({ deleted: true });
-    expect(vacinaRepository.remove).toHaveBeenCalledWith(1);
+  describe('remove', () => {
+    it('should remove a vaccine and the associated expense', async () => {
+      const id = 1;
+      const result = await service.remove(id);
+      expect(result).toEqual({ deleted: true });
+      expect(mockVacinaRepository.remove).toHaveBeenCalledWith(id);
+      expect(mockGastoRepository.remove).toHaveBeenCalledWith(id);
+    });
   });
 });

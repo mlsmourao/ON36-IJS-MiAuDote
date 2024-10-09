@@ -4,9 +4,9 @@ import { CreateDoacaoDto } from '../presenters/http/dto/create-doacao.dto';
 import { UpdateDoacaoDto } from '../presenters/http/dto/update-doacao.dto';
 import { DoacaoRepository } from './ports/doacao.repository';
 import { GastoRepository } from '../../gastos/application/ports/gasto.repository';
-import { GastoFactory } from 'src/gastos/domain/factories/gastos-factory';
-import { CreateGastoDto } from 'src/gastos/presenters/http/dto/create-gasto.dto';
-import { GastoType } from 'src/gastos/domain/enum/gasto.enum';
+import { GastoFactory } from '../../gastos/domain/factories/gastos-factory';
+import { CreateGastoDto } from '../../gastos/presenters/http/dto/create-gasto.dto';
+import { GastoType } from '../../gastos/domain/enum/gasto.enum';
 
 @Injectable()
 export class DoacoesService {
@@ -95,6 +95,8 @@ async update(id: number, updateDoacaoDto: UpdateDoacaoDto): Promise<Doacao> {
   return updatedDoacaoData;}
 
   async remove(id: number): Promise<{ deleted: boolean }> {
+    const doacao = await this.findOne(id);
+    await this.gastoRepository.remove(doacao.id);
     await this.doacaoRepository.remove(id);
     return { deleted: true };
   }

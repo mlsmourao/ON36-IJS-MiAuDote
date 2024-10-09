@@ -3,10 +3,10 @@ import { Vacina } from '../domain/vacinas';
 import { CreateVacinaDto } from '../presenters/http/dto/create-vacina.dto';
 import { UpdateVacinaDto } from '../presenters/http/dto/update-vacina.dto';
 import { VacinaRepository } from './ports/vacinas.repository';
-import { GastoRepository } from 'src/gastos/application/ports/gasto.repository';
-import { GastoFactory } from 'src/gastos/domain/factories/gastos-factory';
-import { CreateGastoDto } from 'src/gastos/presenters/http/dto/create-gasto.dto';
-import { GastoType } from 'src/gastos/domain/enum/gasto.enum';
+import { GastoRepository } from '../../gastos/application/ports/gasto.repository';
+import { GastoFactory } from '../../gastos/domain/factories/gastos-factory';
+import { CreateGastoDto } from '../../gastos/presenters/http/dto/create-gasto.dto';
+import { GastoType } from '../../gastos/domain/enum/gasto.enum';
 
 @Injectable()
 export class VacinasService {
@@ -87,7 +87,9 @@ export class VacinasService {
   }
 
   async remove(id: number): Promise<{ deleted: boolean }> {
-    await this.vacinaRepository.remove(id);
+    const vacina = await this.findOne(id);
+    await this.gastoRepository.remove(vacina.id); 
+    await this.vacinaRepository.remove(id); 
     return { deleted: true };
   }
 }

@@ -1,7 +1,7 @@
-import { Vacina } from 'src/vacinas/domain/vacinas';
-import { Medicamento } from 'src/medicamentos/domain/medicamentos';
-import { Castracao } from 'src/castracoes/domain/castracao';
-import { Pessoa } from 'src/pessoas/domain/pessoas';
+import { Vacina } from '../../vacinas/domain/vacinas';
+import { Medicamento } from '../../medicamentos/domain/medicamentos';
+import { Castracao } from '../../castracoes/domain/castracao';
+import { Pessoa } from '../../pessoas/domain/pessoas';
 
 export class Veterinario extends Pessoa {
     constructor (

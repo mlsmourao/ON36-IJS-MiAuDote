@@ -1,13 +1,10 @@
 import {
   Controller,
   Get,
-  Post,
   Param,
-  Body,
-  Put,
   Delete,
 } from '@nestjs/common';
-import { PessoasService } from 'src/pessoas/application/pessoas.service'; 
+import { PessoasService } from '../../../pessoas/application/pessoas.service'; 
 
 @Controller('pessoas')
 export class PessoasController {

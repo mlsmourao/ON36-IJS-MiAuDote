@@ -8,32 +8,25 @@ describe('DoadoresController', () => {
   let controller: DoadoresController;
   let service: DoadoresService;
 
+  const mockDoador = {
+    id: 1,
+    tipo_doacao: 'Valor',
+    descricao: 'Transferencia de Dinheiro',
+    doacao: [],
+    nome: 'John Doe',
+    cep: '12345-678',
+    endereco: 'Rua Exemplo',
+    telefone: ['123456789'],
+    email: 'johndoe@example.com',
+    cpf: '123.456.789-00',
+  };
+
   const mockDoadoresService = {
-    findAll: jest.fn().mockResolvedValue([{
-      id: 1,
-      tipo_doacao: 'Medicamento',
-      descricao: 'Bravecto',
-      pessoa_id: 1,
-    }]),
-    findOne: jest.fn().mockResolvedValue({
-      id: 1,
-      tipo_doacao: 'Medicamento',
-      descricao: 'Bravecto',
-      pessoa_id: 1,
-    }),
-    create: jest.fn().mockResolvedValue({
-      id: 1,
-      tipo_doacao: 'Medicamento',
-      descricao: 'Bravecto',
-      pessoa_id: 1,
-    }),
-    update: jest.fn().mockResolvedValue({
-      id: 1,
-      tipo_doacao: 'Medicamento',
-      descricao: 'Bravecto 4-12kg',
-      pessoa_id: 1,
-    }),
-    remove: jest.fn().mockResolvedValue({ affected: 1 }),
+    create: jest.fn((dto) => ({ id: Date.now(), ...dto })),
+    findAll: jest.fn(() => [mockDoador]),
+    findOne: jest.fn((id) => ({ ...mockDoador, id })),
+    update: jest.fn((id, dto) => ({ id, ...dto })),
+    remove: jest.fn((id) => ({ id })),
   };
 
   beforeEach(async () => {
@@ -55,63 +48,71 @@ describe('DoadoresController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should return all doadores', async () => {
-    const result = await controller.findAll();
-    expect(result).toEqual([{
-      id: 1,
-      tipo_doacao: 'Medicamento',
-      descricao: 'Bravecto',
-      pessoa_id: 1,
-    }]);
-    expect(service.findAll).toHaveBeenCalled();
-  });
+  describe('create()', () => {
+    it('should create a new donor', async () => {
+      const dto: CreateDoadorDto = {
+        nome: 'John Doe',
+        cep: '12345-678',
+        endereco: 'Rua Exemplo',
+        telefone: ['123456789'],
+        email: 'johndoe@example.com',
+        cpf: '123.456.789-00',
+        tipo_doacao: 'Valor',
+        descricao: 'Transferencia de Dinheiro',
+      };
 
-  it('should return one doador by ID', async () => {
-    const result = await controller.findOne(1);
-    expect(result).toEqual({
-      id: 1,
-      tipo_doacao: 'Medicamento',
-      descricao: 'Bravecto',
-      pessoa_id: 1,
+      expect(await controller.create(dto)).toEqual({
+        id: expect.any(Number),
+        ...dto,
+      });
+
+      expect(service.create).toHaveBeenCalledWith(dto);
     });
-    expect(service.findOne).toHaveBeenCalledWith(1);
   });
 
-  it('should create a new doador', async () => {
-    const createDto: CreateDoadorDto = {
-      tipo_doacao: 'Medicamento',
-      descricao: 'Bravecto',
-      pessoa_id: 1,
-    };
-    const result = await controller.create(createDto);
-    expect(result).toEqual({
-      id: 1,
-      tipo_doacao: 'Medicamento',
-      descricao: 'Bravecto',
-      pessoa_id: 1,
+  describe('findAll()', () => {
+    it('should return an array of donors', async () => {
+      expect(await controller.findAll()).toEqual([mockDoador]);
+      expect(service.findAll).toHaveBeenCalled();
     });
-    expect(service.create).toHaveBeenCalledWith(createDto);
   });
 
-  it('should update a doador', async () => {
-    const updateDto: UpdateDoadorDto = {
-      tipo_doacao: 'Medicamento',
-      descricao: 'Bravecto 4-12kg',
-      pessoa_id: 1,
-    };
-    const result = await controller.update(1, updateDto);
-    expect(result).toEqual({
-      id: 1,
-      tipo_doacao: 'Medicamento',
-      descricao: 'Bravecto',
-      pessoa_id: 1,
+  describe('findOne()', () => {
+    it('should return a single donor by ID', async () => {
+      const id = 1;
+      expect(await controller.findOne(id)).toEqual(mockDoador);
+      expect(service.findOne).toHaveBeenCalledWith(id);
     });
-    expect(service.update).toHaveBeenCalledWith(1, updateDto);
   });
 
-  it('should delete a doador', async () => {
-    const result = await controller.remove(1);
-    expect(result).toEqual({ affected: 1 });
-    expect(service.remove).toHaveBeenCalledWith(1);
+  describe('update()', () => {
+    it('should update an donor', async () => {
+      const id = 1;
+      const dto: UpdateDoadorDto = {
+        tipo_doacao: 'Valor',
+        descricao: 'Updated',
+        nome: 'John Doe',
+        cep: '12345-678',
+        endereco: 'Rua Exemplo',
+        telefone: ['123456789'],
+        email: 'johndoe@example.com',
+        cpf: '123.456.789-00',
+      };
+
+      expect(await controller.update(id, dto)).toEqual({
+        id,
+        ...dto,
+      });
+
+      expect(service.update).toHaveBeenCalledWith(id, dto);
+    });
+  });
+
+  describe('remove()', () => {
+    it('should remove an donor', async () => {
+      const id = 1;
+      expect(await controller.remove(id)).toEqual({ id });
+      expect(service.remove).toHaveBeenCalledWith(id);
+    });
   });
 });

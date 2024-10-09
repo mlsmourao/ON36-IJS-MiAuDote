@@ -3,10 +3,10 @@ import { Medicamento } from '../domain/medicamentos';
 import { CreateMedicamentoDto } from '../presenters/http/dto/create-medicamento.dto';
 import { UpdateMedicamentoDto } from '../presenters/http/dto/update-medicamento.dto';
 import { MedicamentoRepository } from './ports/medicamento.repository';
-import { GastoRepository } from 'src/gastos/application/ports/gasto.repository';
-import { GastoFactory } from 'src/gastos/domain/factories/gastos-factory';
-import { CreateGastoDto } from 'src/gastos/presenters/http/dto/create-gasto.dto';
-import { GastoType } from 'src/gastos/domain/enum/gasto.enum';
+import { GastoRepository } from '../../gastos/application/ports/gasto.repository';
+import { GastoFactory } from '../../gastos/domain/factories/gastos-factory';
+import { CreateGastoDto } from '../../gastos/presenters/http/dto/create-gasto.dto';
+import { GastoType } from '../../gastos/domain/enum/gasto.enum';
 
 @Injectable()
 export class MedicamentosService {
@@ -86,7 +86,9 @@ export class MedicamentosService {
   }
 
   async remove(id: number): Promise<{ deleted: boolean }> {
-    await this.medicamentoRepository.remove(id);
+    const medicamento = await this.findOne(id);
+    await this.gastoRepository.remove(medicamento.id); 
+    await this.medicamentoRepository.remove(id); 
     return { deleted: true };
   }
 }

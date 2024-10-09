@@ -5,12 +5,12 @@ import {
 } from '@nestjs/common';
 import { VeterinarioRepository } from './ports/veterinarios.repository';
 import { Veterinario } from '../domain/veterinarios';
-import { PessoaRepository } from 'src/pessoas/application/ports/pessoas.repository';
+import { PessoaRepository } from '../../pessoas/application/ports/pessoas.repository';
 import { UpdateVeterinarioDto } from '../presenters/http/dto/update-veterinario.dto';
 import { CreateVeterinarioDto } from '../presenters/http/dto/create-veterinario.dto';
-import { PessoaFactory } from 'src/pessoas/domain/factories/pessoas-factory';
-import { PessoaType } from 'src/pessoas/domain/enum/pessoa.enum';
-import { CreatePessoaDto } from 'src/pessoas/presenters/http/dto/create-pessoa.dto';
+import { PessoaFactory } from '../../pessoas/domain/factories/pessoas-factory';
+import { PessoaType } from '../../pessoas/domain/enum/pessoa.enum';
+import { CreatePessoaDto } from '../../pessoas/presenters/http/dto/create-pessoa.dto';
 
 @Injectable()
 export class VeterinariosService {
@@ -105,20 +105,18 @@ export class VeterinariosService {
     };
 
     await this.pessoaRepository.update(veterinario.id, updatedPessoaData);
-    const updatedVeterinario = await this.veterinariosRepository.update(
-      id,
-      updatedVeterinarioData,
-    );
-    if (!updatedVeterinario) {
-      throw new NotFoundException(
-        `Veterinario with ID ${id} not found for update.`,
-      );
+
+    const result = await this.veterinariosRepository.update(id, updatedVeterinarioData);
+    if (!result) {
+      throw new NotFoundException(`Veterinario with ID ${id} not found for update.`);
     }
-    return updatedVeterinario;
+    return updatedVeterinarioData;
   }
 
   async remove(id: number): Promise<{ deleted: boolean }> {
-    await this.veterinariosRepository.remove(id);
+    const veterinario = await this.findOne(id);
+    await this.pessoaRepository.remove(veterinario.id); 
+    await this.veterinariosRepository.remove(id); 
     return { deleted: true };
   }
 }

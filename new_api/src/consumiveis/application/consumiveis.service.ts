@@ -3,10 +3,10 @@ import { Consumivel } from '../domain/consumivel';
 import { CreateConsumivelDto } from '../presenters/http/dto/create-consumivel.dto';
 import { UpdateConsumivelDto } from '../presenters/http/dto/update-consumivel.dto';
 import { ConsumivelRepository } from './ports/consumiveis.repository';
-import { GastoFactory } from 'src/gastos/domain/factories/gastos-factory';
-import { GastoRepository } from 'src/gastos/application/ports/gasto.repository';
-import { CreateGastoDto } from 'src/gastos/presenters/http/dto/create-gasto.dto'
-import { GastoType } from 'src/gastos/domain/enum/gasto.enum';
+import { GastoFactory } from '../../gastos/domain/factories/gastos-factory';
+import { GastoRepository } from '../../gastos/application/ports/gasto.repository';
+import { CreateGastoDto } from '../../gastos/presenters/http/dto/create-gasto.dto'
+import { GastoType } from '../../gastos/domain/enum/gasto.enum';
 
 @Injectable()
 export class ConsumiveisService {
@@ -85,6 +85,8 @@ export class ConsumiveisService {
   }
 
   async remove(id: number): Promise<{ deleted: boolean }> {
+    const consumivel = await this.findOne(id);
+    await this.gastoRepository.remove(consumivel.id);
     await this.consumivelRepository.remove(id);
     return { deleted: true };
   }

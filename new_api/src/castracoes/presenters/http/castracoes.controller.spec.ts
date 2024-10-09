@@ -68,6 +68,10 @@ describe('Teste para CastracoesController', () => {
       condicao_pos: 'Nenhuma',
       veterinario_id: 1,
       gasto_id: 1,
+      data_gasto: undefined,
+      tipo: '',
+      quantidade: 0,
+      valor: 0
     };
     expect(await controller.create(dto)).toEqual({
       id: expect.any(Number),

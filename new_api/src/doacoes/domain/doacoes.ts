@@ -1,4 +1,4 @@
-import { Gasto } from 'src/gastos/domain/gastos';
+import { Gasto } from '../../gastos/domain/gastos';
 
 export class Doacao extends Gasto{
     constructor(

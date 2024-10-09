@@ -1,20 +1,20 @@
 import { Injectable } from "@nestjs/common";
 import { v4 as uuidv4 } from 'uuid';
 import { Pessoa } from "../pessoas";
-import { CreatePessoaDto } from "src/pessoas/presenters/http/dto/create-pessoa.dto";
-import { Veterinario } from "src/veterinarios/domain/veterinarios"; 
-import { CreateVeterinarioDto } from "src/veterinarios/presenters/http/dto/create-veterinario.dto";
-import { Doador } from "src/doadores/domain/doadores"; 
-import { CreateDoadorDto } from "src/doadores/presenters/http/dto/create-doador.dto";
-import { Adotante } from "src/adotantes/domain/adotante";
-import { CreateAdotanteDto } from "src/adotantes/presenters/http/dto/create-adotante.dto";
+import { CreatePessoaDto } from "../../presenters/http/dto/create-pessoa.dto";
+import { Veterinario } from "../../../veterinarios/domain/veterinarios"; 
+import { CreateVeterinarioDto } from "../../../veterinarios/presenters/http/dto/create-veterinario.dto";
+import { Doador } from "../../../doadores/domain/doadores"; 
+import { CreateDoadorDto } from "../../../doadores/presenters/http/dto/create-doador.dto";
+import { Adotante } from "../../../adotantes/domain/adotante";
+import { CreateAdotanteDto } from "../../../adotantes/presenters/http/dto/create-adotante.dto";
 import { PessoaType } from "../enum/pessoa.enum";
-import { Vacina } from "src/vacinas/domain/vacinas";
-import { Medicamento } from "src/medicamentos/domain/medicamentos";
-import { Castracao } from "src/castracoes/domain/castracao";
-import { Doacao } from "src/doacoes/domain/doacoes";
-import { Adocao } from "src/adocoes/domain/adocao";
-import { validarCPF } from "src/pessoas/infrastructure/helpers/cpf-validator";
+import { Vacina } from "../../../vacinas/domain/vacinas";
+import { Medicamento } from "../../../medicamentos/domain/medicamentos";
+import { Castracao } from "../../../castracoes/domain/castracao";
+import { Doacao } from "../../../doacoes/domain/doacoes";
+import { Adocao } from "../../../adocoes/domain/adocao";
+import { validarCPF } from "../../../pessoas/infrastructure/helpers/cpf-validator";
 
 @Injectable()
 export class PessoaFactory {

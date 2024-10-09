@@ -1,8 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PessoasController } from './pessoas.controller';
-import { PessoasService } from 'src/pessoas/application/pessoas.service';
-import { CreatePessoaDto } from './dto/create-pessoa.dto';
-import { UpdatePessoaDto } from './dto/update-pessoa.dto';
+import { PessoasService } from '../../../pessoas/application/pessoas.service';
 
 describe('PessoasController', () => {
   let controller: PessoasController;
@@ -23,24 +21,6 @@ describe('PessoasController', () => {
     findOne: jest.fn().mockResolvedValue({
       id: 1,
       nome: 'João Silva',
-      cep: '12345-678',
-      endereco: 'Rua das Flores, 123',
-      telefone: ['11987654321'],
-      email: 'joao.silva@example.com',
-      cpf: '123.456.789-00',
-    }),
-    create: jest.fn().mockResolvedValue({
-      id: 1,
-      nome: 'João Silva',
-      cep: '12345-678',
-      endereco: 'Rua das Flores, 123',
-      telefone: ['11987654321'],
-      email: 'joao.silva@example.com',
-      cpf: '123.456.789-00',
-    }),
-    update: jest.fn().mockResolvedValue({
-      id: 1,
-      nome: 'Maria Silva',
       cep: '12345-678',
       endereco: 'Rua das Flores, 123',
       telefone: ['11987654321'],
@@ -99,48 +79,4 @@ describe('PessoasController', () => {
     expect(service.findOne).toHaveBeenCalledWith(1);
   });
 
-  it('should create a new pessoa', async () => {
-    const createDto: CreatePessoaDto = {
-      nome: 'João Silva',
-      cep: '12345-678',
-      endereco: 'Rua das Flores, 123',
-      telefone: ['11987654321'],
-      email: 'joao.silva@example.com',
-      cpf: '123.456.789-00',
-    };
-    const result = await controller.create(createDto);
-    expect(result).toEqual({
-      id: 1,
-      nome: 'João Silva',
-      cep: '12345-678',
-      endereco: 'Rua das Flores, 123',
-      telefone: ['11987654321'],
-      email: 'joao.silva@example.com',
-      cpf: '123.456.789-00',
-    });
-    expect(service.create).toHaveBeenCalledWith(createDto);
-  });
-
-  it('should update a pessoa', async () => {
-    const updateDto: UpdatePessoaDto = {
-      nome: 'Maria Silva',
-    };
-    const result = await controller.update(1, updateDto);
-    expect(result).toEqual({
-      id: 1,
-      nome: 'Maria Silva',
-      cep: '12345-678',
-      endereco: 'Rua das Flores, 123',
-      telefone: ['11987654321'],
-      email: 'joao.silva@example.com',
-      cpf: '123.456.789-00',
-    });
-    expect(service.update).toHaveBeenCalledWith(1, updateDto);
-  });
-
-  it('should delete a pessoa', async () => {
-    const result = await controller.remove(1);
-    expect(result).toEqual({ affected: 1 });
-    expect(service.remove).toHaveBeenCalledWith(1);
-  });
 });

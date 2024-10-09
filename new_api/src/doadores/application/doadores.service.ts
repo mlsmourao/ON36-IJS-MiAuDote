@@ -3,9 +3,9 @@ import { Doador } from '../domain/doadores';
 import { CreateDoadorDto } from '../presenters/http/dto/create-doador.dto';
 import { UpdateDoadorDto } from '../presenters/http/dto/update-doador.dto';
 import { DoadorRepository } from './ports/doador.repository';
-import { PessoaRepository } from 'src/pessoas/application/ports/pessoas.repository';
-import { PessoaFactory } from 'src/pessoas/domain/factories/pessoas-factory';
-import { PessoaType } from 'src/pessoas/domain/enum/pessoa.enum';
+import { PessoaRepository } from '../../pessoas/application/ports/pessoas.repository';
+import { PessoaFactory } from '../../pessoas/domain/factories/pessoas-factory';
+import { PessoaType } from '../../pessoas/domain/enum/pessoa.enum';
 
 @Injectable()
 export class DoadoresService {
@@ -61,10 +61,13 @@ export class DoadoresService {
     return this.doadorRepository.save(newDoador);
   } 
 
-  async update(id: number, updateDoadorDto: UpdateDoadorDto): Promise<Doador> {
+  async update(
+    id: number, 
+    updateDoadorDto: UpdateDoadorDto
+  ): Promise<Doador> {
     const doador = await this.findOne(id);
     
-    const updatedDoadorData: Partial<Doador> = {
+    const updatedDoadorData = {
       ...doador,
       ...updateDoadorDto,
     };
@@ -86,17 +89,18 @@ export class DoadoresService {
 
     await this.pessoaRepository.update(doador.id, updatedPessoaData);
 
-    const updatedDoador = await this.doadorRepository.update(id, updatedDoadorData);
-    if (!updatedDoador) {
+    const result = await this.doadorRepository.update(id, updatedDoadorData);
+    if (!result) {
       throw new NotFoundException(`Doador with ID ${id} not found for update.`);
     }
 
-    return updatedDoador; 
+    return updatedDoadorData; 
   }
 
   async remove(id: number): Promise<{ deleted: boolean }> {
     const doador = await this.findOne(id);
-    await this.doadorRepository.remove(id);
+    await this.pessoaRepository.remove(doador.id); 
+    await this.doadorRepository.remove(id); 
     return { deleted: true };
   }
 }
